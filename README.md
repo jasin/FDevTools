@@ -15,12 +15,5 @@ Your source plugin should follow this format:
 2. Plugin.yml goes into resources (e.g. src/main/resources/plugin.yml)
 3. Source code goe into java (e.g. src/main/java/your/package/*.java)
 
-Now your plugin should looks like this:
->MyPlugin_src
-├src
-    ├main
-        ├java
-        └resources
-
 # Commands
 * `makeplugin <PluginName>` - Compress the plugin into jar format(It must loaded by FDevTools).
