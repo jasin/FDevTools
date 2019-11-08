@@ -59,7 +59,7 @@ public class SourcePluginClassLoader extends URLClassLoader
 	{
 		try
 		{
-			File res=new File(this.pluginPath+"resources/"+name);
+			File res=new File(this.pluginPath+"src/main/resources/"+name);
 			if(res.exists())
 			{
 				return res.toURI().toURL();

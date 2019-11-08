@@ -1,10 +1,11 @@
 package moe.berd.FDevTools;
 
 import java.io.*;
-import java.nio.charset.*;
+import java.nio.file.*;
 
 import java.util.*;
 import java.util.regex.*;
+import java.util.stream.*;
 
 import javax.tools.*;
 import javax.tools.JavaCompiler.*;
@@ -86,7 +87,7 @@ public class SourcePluginLoader implements PluginLoader
 	{
 		try
 		{
-			File yml=new File(dir.getAbsolutePath(),"plugin.yml");
+			File yml=new File(dir.getAbsolutePath() + "/src/main/resources", "plugin.yml");
 			return dir.isDirectory() && yml.isFile()?new PluginDescription(Utils.readFile(yml)):null;
 		} catch (Exception e)
 		{
