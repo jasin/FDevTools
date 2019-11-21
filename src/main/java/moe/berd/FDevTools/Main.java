@@ -43,131 +43,6 @@ public class Main extends PluginBase
 		}
 	}
 	
-	public boolean onCommand(CommandSender sender,Command command,String label,String[] args)
-	{
-		switch(command.getName())
-		{
-		case "makeplugin":
-			try
-			{
-				if(args.length<1)
-				{
-					return false;
-				}
-				else
-				{
-					Plugin plugin=this.getServer().getPluginManager().getPlugin(args[0]);
-					if(plugin==null)
-					{
-						sender.sendMessage("[FDevTools] "+TextFormat.RED+"Plugin not exists,check your plugin name");
-					}
-					else if(plugin.getPluginLoader().getClass()!=SourcePluginLoader.class)
-					{
-						sender.sendMessage("[FDevTools] "+TextFormat.RED+"Plugin isn't loaded by FDevTools");
-					}
-					else
-					{
-						SourcePluginLoader loader=(SourcePluginLoader)plugin.getPluginLoader();
-						File dir=loader.getPluginPath(plugin);
-						if(dir==null)
-						{
-							sender.sendMessage("[FDevTools] "+TextFormat.RED+"Can't find plugin source path!");
-						}
-						else
-						{
-							File class_file=new File(dir.getAbsolutePath()+"/src_compile");
-							File jar_file=new File(this.getDataFolder(),"packed/"+plugin.getName()+"_v"+plugin.getDescription().getVersion()+".jar");
-							if(args.length>=2 && args[1].toLowerCase().equals("true"))
-							{
-								sender.sendMessage("[FDevTools] "+TextFormat.AQUA+"Re-compiling source...");
-								if(!loader.compilePlugin(dir,class_file))
-								{
-									sender.sendMessage("[FDevTools] "+TextFormat.RED+"Can't compile plugin source!");
-									break;
-								}
-							}
-							if(jar_file.exists())
-							{
-								if(!jar_file.isFile())
-								{
-									sender.sendMessage("[FDevTools] "+TextFormat.RED+"Plugin jar file exists and it's a directory!");
-									break;
-								}
-								sender.sendMessage("[FDevTools] Jar already exists,overriding...");
-								if(!jar_file.delete())
-								{
-									sender.sendMessage("[FDevTools] "+TextFormat.RED+"Can't override jar file!");
-									break;
-								}
-							}
-							FileOutputStream file_stream=new FileOutputStream(jar_file);
-							Manifest manifest=new Manifest();
-							Attributes attr=manifest.getMainAttributes();
-							attr.putValue("Manifest-Version","1.0.0");
-							attr.putValue("Signature-Version","1.0.0");
-							attr.putValue("Created-By","FDevTools v"+this.getDescription().getVersion());
-							attr.putValue("Class-Path",plugin.getDescription().getMain());
-							JarOutputStream jar_stream=new JarOutputStream(file_stream,manifest);
-							jar_stream.setMethod(JarOutputStream.DEFLATED);
-							List<File> src_files=listFolder(class_file,"class");
-							List<File> res_files=listFolder(dir,"");
-							if(src_files!=null && res_files!=null)
-							{
-								for(File file:src_files)
-								{
-									String fileName=file.getAbsolutePath().replace("\\","/").replaceFirst(class_file.toString().replace("\\","/")+"/","");
-									sender.sendMessage("[FDevTools] Add class file "+fileName+"...");
-									FileInputStream fis=new FileInputStream(file);
-									jar_stream.putNextEntry(new JarEntry(fileName));
-									int length=0;
-									byte[] buffer=new byte[4096];
-									while((length=fis.read(buffer))!=-1)
-									{
-										jar_stream.write(buffer,0,length);
-									}
-									fis.close();
-								}
-								for(File file:res_files)
-								{
-									String fileName=file.getAbsolutePath().replace("\\","/").replaceFirst(dir.toString().replace("\\","/")+"/",""),splited=fileName.split("/")[0];
-									if(splited.equals("src") || splited.equals(class_file.getName()))
-									{
-										continue;
-									}
-									sender.sendMessage("[FDevTools] Add resouces file "+fileName+"...");
-									FileInputStream fis=new FileInputStream(file);
-									jar_stream.putNextEntry(new JarEntry(fileName));
-									int length=0;
-									byte[] buffer=new byte[4096];
-									while((length=fis.read(buffer))!=-1)
-									{
-										jar_stream.write(buffer,0,length);
-									}
-									fis.close();
-								}
-								jar_stream.close();
-								file_stream.close();
-								sender.sendMessage("[FDevTools] "+TextFormat.GREEN+"Jar file saved to "+jar_file.toString());
-							}
-							else
-							{
-								sender.sendMessage("[FDevTools] "+TextFormat.RED+"Can't list files!");
-							}
-						}
-					}
-				}
-			}
-			catch(Exception e)
-			{
-				sender.sendMessage("[FDevTools] "+TextFormat.RED+e.getMessage());
-			}
-			break;
-		default:
-			return false;
-		}
-		return true;
-	}
-	
 	public JavaCompiler getCompiler()
 	{
 		return this.compiler;
@@ -194,7 +69,7 @@ public class Main extends PluginBase
 					jar_file.toURI().toURL()
 				});
 				Class tools=loader.loadClass("com.sun.tools.javac.api.JavacTool");
-				this.compiler=(JavaCompiler)tools.asSubclass(JavaCompiler.class).newInstance();
+				this.compiler=(JavaCompiler)tools.asSubclass(JavaCompiler.class).getDeclaredConstructor().newInstance();
 			}
 			catch (Exception e)
 			{
